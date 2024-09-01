@@ -1,0 +1,97 @@
+import Rosetta from '../core';
+import {
+  currencyConversionPlugin,
+  rtlSupportPlugin,
+  advancedPluralizationPlugin,
+  parsingPlugin,
+  languageDetectionPlugin,
+  ssrSupportPlugin
+} from '../plugins';
+
+describe('Plugins', () => {
+  let rosetta: Rosetta;
+
+  beforeEach(() => {
+    rosetta = new Rosetta({
+      language: 'en',
+      plugins: [
+        currencyConversionPlugin,
+        rtlSupportPlugin,
+        advancedPluralizationPlugin,
+        parsingPlugin,
+        languageDetectionPlugin,
+        ssrSupportPlugin
+      ],
+    });
+  });
+
+  describe('currencyConversionPlugin', () => {
+    test('converts currency correctly', () => {
+      expect(rosetta.convertCurrency(100, 'USD', 'EUR')).toBe(120);
+    });
+
+    test('handles invalid currency codes', () => {
+      expect(() => rosetta.convertCurrency(100, 'USD', 'INVALID')).toThrow();
+    });
+  });
+
+  describe('rtlSupportPlugin', () => {
+    test('detects RTL languages correctly', () => {
+      expect(rosetta.isRTL()).toBe(false);
+      rosetta.setLanguage('ar');
+      expect(rosetta.isRTL()).toBe(true);
+    });
+  });
+
+  describe('advancedPluralizationPlugin', () => {
+    test('handles complex pluralization rules', () => {
+      rosetta.setLanguage('ar');
+      expect(rosetta.formatPluralAdvanced(0, {
+        zero: 'صفر',
+        one: 'واحد',
+        two: 'اثنان',
+        few: 'القليل',
+        many: 'كثير',
+        other: 'آخر'
+      })).toBe('صفر');
+    });
+  });
+
+  describe('parsingPlugin', () => {
+    test('parses numbers correctly', () => {
+      expect(rosetta.parseNumber('1,234.56')).toBe(1234.56);
+    });
+
+    test('parses dates correctly', () => {
+      const date = rosetta.parseDate('2023-05-15');
+      expect(date).toBeInstanceOf(Date);
+      expect(date.getFullYear()).toBe(2023);
+      expect(date.getMonth()).toBe(4); // May is 4 (zero-indexed)
+      expect(date.getDate()).toBe(15);
+    });
+  });
+
+  describe('languageDetectionPlugin', () => {
+    test('detects language correctly', () => {
+      // Mock navigator.language
+      Object.defineProperty(window.navigator, 'language', {
+        value: 'fr-FR',
+        configurable: true
+      });
+
+      expect(rosetta.detectLanguage()).toBe('fr');
+    });
+  });
+
+  describe('ssrSupportPlugin', () => {
+    test('generates static routes correctly', () => {
+      const routes = ['/home', '/about', '/contact'];
+      const staticRoutes = rosetta.generateStaticRoutes(routes);
+      expect(staticRoutes).toEqual([
+        { route: '/home', languages: ['en'] },
+        { route: '/about', languages: ['en'] },
+        { route: '/contact', languages: ['en'] },
+      ]);
+    });
+  });
+});
