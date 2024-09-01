@@ -1,0 +1,60 @@
+import Rosetta from '../core';
+
+describe('Rosetta', () => {
+  let rosetta: Rosetta;
+
+  beforeEach(() => {
+    rosetta = new Rosetta({
+      language: 'en',
+      fallbackLanguage: 'en',
+      translations: {
+        en: {
+          greeting: 'Hello, {{name}}!',
+          items: {
+            one: 'You have {{count}} item',
+            other: 'You have {{count}} items',
+          },
+        },
+        es: {
+          greeting: '¡Hola, {{name}}!',
+          items: {
+            one: 'Tienes {{count}} artículo',
+            other: 'Tienes {{count}} artículos',
+          },
+        },
+      },
+    });
+  });
+
+  test('t() translates correctly', () => {
+    expect(rosetta.t('greeting', { name: 'John' })).toBe('Hello, John!');
+  });
+
+  test('setLanguage() changes the language', () => {
+    rosetta.setLanguage('es');
+    expect(rosetta.t('greeting', { name: 'Juan' })).toBe('¡Hola, Juan!');
+  });
+
+  test('formatPlural() works correctly', () => {
+    expect(rosetta.formatPlural(1, rosetta.t('items'))).toBe('You have 1 item');
+    expect(rosetta.formatPlural(3, rosetta.t('items'))).toBe('You have 3 items');
+  });
+
+  test('formatNumber() formats numbers correctly', () => {
+    expect(rosetta.formatNumber(1234.56)).toBe('1,234.56');
+  });
+
+  test('formatDate() formats dates correctly', () => {
+    const date = new Date('2023-05-15T12:00:00Z');
+    expect(rosetta.formatDate(date)).toMatch(/5\/15\/2023/);
+  });
+
+  test('fallback to fallbackLanguage when translation is missing', () => {
+    rosetta.setLanguage('fr'); // 'fr' is not in our translations
+    expect(rosetta.t('greeting', { name: 'Pierre' })).toBe('Hello, Pierre!');
+  });
+
+  test('returns key when translation is missing in both language and fallback', () => {
+    expect(rosetta.t('missing.key')).toBe('missing.key');
+  });
+});
