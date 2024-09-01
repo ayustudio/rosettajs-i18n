@@ -67,6 +67,18 @@ declare module 'rosettajs-i18n' {
     formatPlural: Rosetta['formatPlural'];
   };
 
+  // Preact adapter
+  import { ComponentChildren, FunctionComponent } from 'preact';
+
+  export const RosettaProvider: FunctionComponent<{ rosetta: Rosetta; children: ComponentChildren }>;
+  export function useRosetta(): Rosetta;
+  export function useTranslation(): {
+    t: Rosetta['t'];
+    formatNumber: Rosetta['formatNumber'];
+    formatDate: Rosetta['formatDate'];
+    formatPlural: Rosetta['formatPlural'];
+  };
+
   // Plugins
   export const currencyConversionPlugin: Plugin;
   export const rtlSupportPlugin: Plugin;
